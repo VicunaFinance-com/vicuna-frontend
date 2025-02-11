@@ -12,8 +12,7 @@ import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
 import { CloseModal } from "./close-modal";
 import { DoubleAvatar } from "../ui/double-avatar";
-import { LeveragedModal } from "./leveraged-modal";
-import { farmsData, borrowData } from "@/lib/constants";
+import { farmsData } from "@/lib/constants";
 import { LeveragedFarmingModal } from "./leveraged-farming-modal";
 
 export const LeveragedFarming = () => {

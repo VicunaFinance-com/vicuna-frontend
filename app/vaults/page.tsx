@@ -1,6 +1,9 @@
+"use client";
 import { SearchFilter } from "@/components/search-filter";
 import { NetworkTvl } from "@/components/vaults/network-tvl";
 import { VaultTable } from "@/components/vaults/vault-table";
+import { bnToStr } from "@/helpers";
+import { useTokenBalance } from "@/hooks";
 
 export default function Page() {
   return (
