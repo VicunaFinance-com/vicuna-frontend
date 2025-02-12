@@ -6,6 +6,7 @@ export type VaultData = {
   token1Name: string;
   imageSrc0?: string;
   imageSrc1?: string;
+  vaultReward: string;
   kind: "clm" | "v7";
   chainId: number;
   lpUrl: string;
@@ -20,6 +21,7 @@ export type VaultDataPlus = {
   imageSrc0?: string;
   imageSrc1?: string;
   dexImage: string;
+  vaultReward: string;
   kind: "clm" | "v7";
   lpUrl: string;
   chainId: number;
