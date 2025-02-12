@@ -23,6 +23,7 @@ import {
   custom,
   http,
   Chain,
+  Address,
 } from "viem";
 import { readContract } from "viem/actions";
 import { base, arbitrum, fantom } from "viem/chains";
@@ -39,6 +40,7 @@ import {
 import { USDC_ABI, RPC_URLS } from "@/lib/constants";
 import { PresaleBonus } from "@/lib/constants";
 import { usePresaleBonus } from "@/hooks/usePresaleBonus";
+import { useAllowance } from "@/hooks";
 
 interface Props {
   setBalance: Function;
@@ -138,8 +140,8 @@ export const PresaleModal = (props: Props) => {
   const { toast } = useToast();
 
   const [selectedItem, setSelectedItem] = useState<string>("USDC");
-  const [selectedMode, setSelectedMode] = useState<number>(1);
-  const [selectedLockTime, setSelectedLockTime] = useState<number>(7);
+  const [selectedMode, setSelectedMode] = useState<1 | 2 | 3>(1);
+  const [selectedLockTime, setSelectedLockTime] = useState<7 | 12 | 18 | 24>(7);
 
   const { balance, coinAddress } = useBalance(selectedItem);
   const { hardCap, totlDepositedAmount } = useHardCap(
@@ -278,11 +280,11 @@ export const PresaleModal = (props: Props) => {
     }
   };
 
-  const handleModeChange = (value: number) => {
+  const handleModeChange = (value: 1 | 2 | 3) => {
     setSelectedMode(value);
   };
 
-  const handleLockTimeChange = (value: number) => {
+  const handleLockTimeChange = (value: 7 | 12 | 18 | 24) => {
     setSelectedLockTime(value);
   };
 

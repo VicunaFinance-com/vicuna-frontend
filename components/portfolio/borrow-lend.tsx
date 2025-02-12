@@ -14,9 +14,8 @@ import { PlusIcon, X } from "lucide-react";
 import { CloseModal } from "./close-modal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { BorrowLendModal } from "./borrow-lend-modal";
-import { borrowData } from "@/lib/constants";
 import { LeveragedModal } from "./leveraged-modal";
-import { SupplyModal } from "../borrow/supply-modal";
+import { MarketModal } from "../new/markets/MarketModal";
 
 export const BorrowLend = () => {
   const [showSupplyModal, setShowSupplyModal] = useState(false);
@@ -76,7 +75,7 @@ export const BorrowLend = () => {
           </TableBody>
         </Table>
         <div className="flex items-end lg:items-center justify-end lg:justify-center gap-4 pt-2 lg:pt-0">
-          <SupplyModal
+          {/* <SupplyModal
             borrow={borrowData[0]}
             defaultIsBorrow={false}
             isVisible={showSupplyModal}
@@ -86,7 +85,7 @@ export const BorrowLend = () => {
               <PlusIcon className="w-4 h-4 mr-2" />
               Supply
             </Button>
-          </SupplyModal>
+          </SupplyModal> */}
 
           {/* this component is not used in the app. delete? */}
           {/* <BorrowLendModal borrow={borrowData[0]}>
@@ -98,7 +97,7 @@ export const BorrowLend = () => {
 
           {/* conbining Leverage Modal content into Supply Modal component */}
           {/* note that I added the isVisible and onClose properties, so that the component will reset to it's intiial state based on which trigger is used - supply or repay */}
-          <SupplyModal
+          {/* <SupplyModal
             borrow={borrowData[0]}
             defaultIsBorrow={true}
             isVisible={showRepayModal}
@@ -108,7 +107,7 @@ export const BorrowLend = () => {
               <X className="w-4 h-4 mr-2" />
               Repay
             </Button>
-          </SupplyModal>
+          </SupplyModal> */}
 
           {/* old Leveraged Modal (combined into supply modal) */}
           {/* <LeveragedModal borrow={borrowData[0]}>

@@ -1,8 +1,13 @@
+"use client";
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
+import { useCorrectChain } from "@/hooks";
+import { useAccount } from "wagmi";
+import { ConnectWalletDialog } from "../layout/connect-wallet";
+import { useState } from "react";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center whitespace-nowrap rounded-full text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
@@ -53,4 +58,44 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 Button.displayName = "Button";
 
-export { Button, buttonVariants };
+const ChainButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, onClick, ...props }, ref) => {
+    const { isConnected } = useAccount();
+    const { isCorrectChain, handleSwitchChain } = useCorrectChain();
+    const [isOpen, setIsOpen] = useState(false);
+    const handleClick = (
+      e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    ) => {
+      if (!isConnected) {
+        setIsOpen(true);
+      } else if (!isCorrectChain) {
+        handleSwitchChain();
+      } else {
+        onClick?.(e);
+      }
+    };
+
+    const buttonText = !isConnected
+      ? "Connect Wallet"
+      : !isCorrectChain
+      ? "Switch Chain"
+      : props.children;
+
+    const Comp = asChild ? Slot : "button";
+    return (
+      <>
+        <Comp
+          className={cn(buttonVariants({ variant, size, className }))}
+          ref={ref}
+          onClick={handleClick}
+          {...props}
+        >
+          {buttonText}
+        </Comp>
+        <ConnectWalletDialog isOpen={isOpen} setIsOpen={setIsOpen} />
+      </>
+    );
+  }
+);
+
+export { Button, buttonVariants, ChainButton };

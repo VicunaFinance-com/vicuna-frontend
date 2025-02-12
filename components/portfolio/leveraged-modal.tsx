@@ -9,7 +9,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { BorrowData } from "@/types/borrow";
 import { Input } from "@/components/ui/input";
 import { PercentageBar } from "@/components/ui/percentage-bar";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
@@ -19,12 +18,13 @@ import Image from "next/image";
 import { Deposit } from "../icons/deposit";
 import { Withdraw } from "../icons/withdraw";
 import { ArrowRight, CheckCheck } from "lucide-react";
+import { MarketInfo } from "@/types";
 
 export const LeveragedModal = ({
   borrow,
   children,
 }: {
-  borrow: BorrowData;
+  borrow: MarketInfo;
   children: ReactNode;
 }) => {
   const [activeTab, setActiveTab] = useState("borrow");

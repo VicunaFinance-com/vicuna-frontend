@@ -27,7 +27,7 @@ export const Navbar = () => {
   const pathname = usePathname();
 
   const navItems = [
-    { name: "Borrow/Lend", href: "/borrow", src: "/icons/borrow.png" },
+    { name: "Borrow/Lend", href: "/markets", src: "/icons/borrow.png" },
     { name: "Farms", href: "/farms", src: "/icons/farms.png" },
     { name: "Vaults", href: "/vaults", src: "/icons/vault.png" },
     { name: "Portfolio", href: "/portfolio", src: "/icons/portfolio.png" },

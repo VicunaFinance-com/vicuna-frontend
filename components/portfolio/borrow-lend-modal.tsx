@@ -9,7 +9,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { BorrowData } from "@/types/borrow";
+import { MarketInfo } from "@/types/markets";
 import { Input } from "@/components/ui/input";
 import { PercentageBar } from "@/components/ui/percentage-bar";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
@@ -24,7 +24,7 @@ export const BorrowLendModal = ({
   borrow,
   children,
 }: {
-  borrow: BorrowData;
+  borrow: MarketInfo;
   children: ReactNode;
 }) => {
   const [activeTab, setActiveTab] = useState("borrow");

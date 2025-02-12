@@ -22,41 +22,19 @@ import {
 import { formatAddress } from "@/lib/utils";
 import Image from "next/image";
 
-export const ConnectWallet = () => {
-  const { isConnected, address } = useAccount();
-  const { connect, connectors } = useConnect();
-  const { disconnect } = useDisconnect();
-  const [isOpen, setIsOpen] = useState(false);
+interface ConnectWalletDialogProps {
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+}
 
-  if (isConnected && address) {
-    return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="default" className="bg-primary">
-            <span className="hidden sm:inline">{formatAddress(address)}</span>
-            <Wallet className="w-5 h-5 ml-0 sm:ml-2" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className=" w-40">
-          <DropdownMenuItem
-            onClick={() => disconnect()}
-            className="flex items-center justify-between"
-          >
-            Disconnect <PowerIcon className="w-4 h-4" />
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    );
-  }
+export const ConnectWalletDialog = ({
+  isOpen,
+  setIsOpen,
+}: ConnectWalletDialogProps) => {
+  const { connect, connectors } = useConnect();
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant="default" className="bg-primary">
-          Connect Wallet
-          <Wallet className="w-5 h-5 ml-2" />
-        </Button>
-      </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader className="flex flex-col items-center">
           <div className="py-4">
@@ -97,5 +75,50 @@ export const ConnectWallet = () => {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+};
+
+interface ConnectWalletButtonProps {
+  onClick: () => void;
+}
+
+export const ConnectWalletButton = ({ onClick }: ConnectWalletButtonProps) => (
+  <Button variant="default" className="bg-primary" onClick={onClick}>
+    Connect Wallet
+    <Wallet className="w-5 h-5 ml-2" />
+  </Button>
+);
+
+export const ConnectWallet = () => {
+  const { isConnected, address } = useAccount();
+  const { disconnect } = useDisconnect();
+  const [isOpen, setIsOpen] = useState(false);
+
+  if (isConnected && address) {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="default" className="bg-primary">
+            <span className="hidden sm:inline">{formatAddress(address)}</span>
+            <Wallet className="w-5 h-5 ml-0 sm:ml-2" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className=" w-40">
+          <DropdownMenuItem
+            onClick={() => disconnect()}
+            className="flex items-center justify-between"
+          >
+            Disconnect <PowerIcon className="w-4 h-4" />
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
+
+  return (
+    <>
+      <ConnectWalletButton onClick={() => setIsOpen(true)} />
+      <ConnectWalletDialog isOpen={isOpen} setIsOpen={setIsOpen} />
+    </>
   );
 };

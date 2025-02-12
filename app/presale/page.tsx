@@ -15,7 +15,7 @@ export default function Page() {
 
   return (
     <div className="relative">
-      <div className="bg-card p-4 h-full rounded-lg mx-10 mx-auto my-[150px] flex flex-col gap-6 shadow-2xl w-full max-w-lg blur-md">
+      <div className="bg-card p-4 h-full rounded-lg mx-10 mx-auto my-[150px] flex flex-col gap-6 shadow-2xl w-full max-w-lg">
         <div className="flex flex-col justify-evenly gap-4">
           <h1 className="text-primary text-lg font-semibold text-[#f22321] text-center">
             Vicuna Finance Presale
@@ -47,12 +47,6 @@ export default function Page() {
             setTotalDeposited={setTotalDeposited}
             referCode={refer}
           />
-        </div>
-      </div>
-
-      <div className="absolute inset-0 flex items-center justify-center z-50">
-        <div className="relative w-[750px] h-[250px] rounded-[50px] shadow-2xl">
-          <Image src={"/work-in-progress.png"} alt={""} fill />
         </div>
       </div>
     </div>

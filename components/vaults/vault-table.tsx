@@ -27,12 +27,13 @@ import { BreakdownData, VaultDataPlus, LpsData } from "@/types/vault";
 
 import BeefyVaultCLM from "@/config/BeefyVaultConcLiq.json";
 import BeefyVaultV7 from "@/config/BeefyVaultV7.json";
-import { readContract } from '@wagmi/core'
-import { config } from '@/lib/config'
+import { readContract } from "@wagmi/core";
+import { config } from "@/lib/config";
 import { Address, formatEther } from "viem";
-import axios from 'axios';
+import axios from "axios";
 import { useTvl } from "@/hooks/useTvl";
 import { formatNumberWithSuffix } from "@/lib/utils";
+import { useSearch } from "@/hooks";
 
 const fetchBreakdown = async () => {
   try {
@@ -56,11 +57,12 @@ const fetchLps = async () => {
 
 export const VaultTable = () => {
   const { address } = useAccount();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [vaults, setVaults] = useState<VaultDataPlus[]>(vaultData as VaultDataPlus[]);
-  const [vault, setVault] = useState(searchParams.get("vault") || "all");
+  const [vaults, setVaults] = useState<VaultDataPlus[]>(
+    vaultData as VaultDataPlus[]
+  );
+  const { filter } = useSearch("vaults", (vault: VaultDataPlus) => vault.name);
   const [refreshKey, setRefreshKey] = useState(0);
+  console.log(filter(vaults));
 
   const { tvl } = useTvl();
 
@@ -77,21 +79,6 @@ export const VaultTable = () => {
     });
   }, []);
 
-  const updateURL = useCallback(
-    (vault: string) => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (vault !== "all") params.set("vault", vault);
-      else params.delete("vault");
-
-      router.push(`/vaults?${params.toString()}`, { scroll: false });
-    },
-    [searchParams, router]
-  );
-
-  useEffect(() => {
-    updateURL(vault);
-  }, [vault, updateURL]);
-
   useEffect(() => {
     const fetchVaultData = async () => {
       if (!lps) {
@@ -101,26 +88,35 @@ export const VaultTable = () => {
         vaultData.map(async (vault) => {
           try {
             if (vault.kind === "clm") {
-              let walletBalanceEth = "0"
-              let vaultBalanceEth0 = "0"
-              let vaultBalanceEth1 = "0"
+              let walletBalanceEth = "0";
+              let vaultBalanceEth0 = "0";
+              let vaultBalanceEth1 = "0";
               if (address && address != undefined) {
-                const vaultBalance = await readContract(config as Config, {
+                const vaultBalance = (await readContract(config as Config, {
                   abi: BeefyVaultCLM.abi,
                   address: vault.vaultAddress as Address,
                   functionName: "balances",
-                }) as [bigint, bigint];
+                })) as [bigint, bigint];
 
-                const balance = await readContract(config as Config, {
+                const balance = (await readContract(config as Config, {
                   abi: BeefyVaultCLM.abi,
                   address: vault.vaultAddress as Address,
                   functionName: "balanceOf",
                   args: [address as Address],
-                }) as bigint;
+                })) as bigint;
 
-                walletBalanceEth = parseFloat(formatEther(balance)).toFixed(9).replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "");
-                vaultBalanceEth0 = parseFloat(formatEther(vaultBalance[0])).toFixed(9).replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "");
-                vaultBalanceEth1 = parseFloat(formatEther(vaultBalance[1])).toFixed(9).replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "");
+                walletBalanceEth = parseFloat(formatEther(balance))
+                  .toFixed(9)
+                  .replace(/(\.\d*?)0+$/, "$1")
+                  .replace(/\.$/, "");
+                vaultBalanceEth0 = parseFloat(formatEther(vaultBalance[0]))
+                  .toFixed(9)
+                  .replace(/(\.\d*?)0+$/, "$1")
+                  .replace(/\.$/, "");
+                vaultBalanceEth1 = parseFloat(formatEther(vaultBalance[1]))
+                  .toFixed(9)
+                  .replace(/(\.\d*?)0+$/, "$1")
+                  .replace(/\.$/, "");
               }
 
               return {
@@ -131,7 +127,7 @@ export const VaultTable = () => {
                   token1: vaultBalanceEth1,
                 },
                 breakdown: breakdown ? breakdown[vault.id] : undefined,
-                tvl: tvl?.["146"] ? tvl["146"][vault.id] : 0
+                tvl: tvl?.["146"] ? tvl["146"][vault.id] : 0,
               };
             }
 
@@ -143,42 +139,61 @@ export const VaultTable = () => {
               let walletBalanceUSD = "0";
 
               if (address && address != undefined) {
-
-                const balance = await readContract(config as Config, {
+                const balance = (await readContract(config as Config, {
                   abi: BeefyVaultV7.abi,
                   address: vault.vaultAddress as Address,
                   functionName: "balanceOf",
                   args: [address as Address],
-                }) as bigint;
+                })) as bigint;
 
                 const tokenAddress = await readContract(config as Config, {
                   abi: BeefyVaultV7.abi,
                   address: vault.vaultAddress as Address,
-                  functionName: 'want'
+                  functionName: "want",
                 });
 
                 if (!tokenAddress) {
-                  throw new Error('Invalid response from want function');
+                  throw new Error("Invalid response from want function");
                 }
 
-                const walletBalance = await readContract(config as Config, {
+                const walletBalance = (await readContract(config as Config, {
                   abi: BeefyVaultV7.abi,
                   address: tokenAddress as Address,
                   functionName: "balanceOf",
                   args: [address as Address],
-                }) as bigint;
+                })) as bigint;
 
-                const vaultPrice = await readContract(config as Config, {
+                const vaultPrice = (await readContract(config as Config, {
                   abi: BeefyVaultV7.abi,
                   address: vault.vaultAddress as Address,
                   functionName: "getPricePerFullShare",
-                }) as bigint;
+                })) as bigint;
 
-                depositedBalanceEth = parseFloat(formatEther(balance)).toFixed(9).replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "");
-                walletBalanceEth = parseFloat(formatEther(walletBalance)).toFixed(9).replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "");
+                depositedBalanceEth = parseFloat(formatEther(balance))
+                  .toFixed(9)
+                  .replace(/(\.\d*?)0+$/, "$1")
+                  .replace(/\.$/, "");
+                walletBalanceEth = parseFloat(formatEther(walletBalance))
+                  .toFixed(9)
+                  .replace(/(\.\d*?)0+$/, "$1")
+                  .replace(/\.$/, "");
 
-                depositedBalanceUSD = (parseFloat(formatEther(balance)) * lps?.[vault.id] * parseFloat(formatEther(vaultPrice))).toFixed(2).replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "");
-                walletBalanceUSD = (parseFloat(formatEther(walletBalance)) * lps?.[vault.id] * parseFloat(formatEther(vaultPrice))).toFixed(2).replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "");
+                depositedBalanceUSD = (
+                  parseFloat(formatEther(balance)) *
+                  lps?.[vault.id] *
+                  parseFloat(formatEther(vaultPrice))
+                )
+                  .toFixed(2)
+                  .replace(/(\.\d*?)0+$/, "$1")
+                  .replace(/\.$/, "");
+                walletBalanceUSD = (
+                  parseFloat(formatEther(walletBalance)) *
+                  lps?.[vault.id] *
+                  parseFloat(formatEther(vaultPrice))
+                )
+                  .toFixed(2)
+                  .replace(/(\.\d*?)0+$/, "$1")
+                  .replace(/\.$/, "");
               }
               return {
                 ...vault,
@@ -193,7 +208,7 @@ export const VaultTable = () => {
                   token1: "0",
                 },
                 breakdown: breakdown ? breakdown[vault.id] : undefined,
-                tvl: tvl?.["146"] ? tvl["146"][vault.id] : 0
+                tvl: tvl?.["146"] ? tvl["146"][vault.id] : 0,
               };
             }
           } catch (error) {
@@ -209,9 +224,6 @@ export const VaultTable = () => {
     fetchVaultData();
   }, [address, refreshKey, breakdown, tvl, lps]);
 
-  const handleVaultChange = (value: string) =>
-    setVault(value === "personal" ? address || "all" : value);
-
   return (
     <div className="p-4">
       {/* <AssetFilter /> */}
@@ -220,7 +232,7 @@ export const VaultTable = () => {
           <TableHead className="flex items-center gap-4 h-16 font-bold text-base ">
             Vaults
             <div className="flex items-center gap-4 justify-center">
-              <Tabs value={vault} onValueChange={handleVaultChange}>
+              <Tabs>
                 <TabsList>
                   <TabsTrigger value="all" className="text-primary">
                     All Vaults
@@ -260,20 +272,38 @@ export const VaultTable = () => {
           <TableHead></TableHead>
         </TableHeader>
         <TableBody>
-          {vaults.map((vault, index) => (
-            <TableRow key={index} className="relative text-primary border-t-background">
+          {filter(vaults).map((vault, index) => (
+            <TableRow
+              key={index}
+              className="relative text-primary border-t-background"
+            >
               <TableCell>
                 {vault.dexImage === "/icons/dex/equalizer.svg" ? (
                   <div className="absolute flex items-center left-[-9px] h-[calc(100%-32px)]">
-                    <Image src={vault.dexImage} alt={""} height={50} width={50} />
+                    <Image
+                      src={vault.dexImage}
+                      alt={""}
+                      height={50}
+                      width={50}
+                    />
                   </div>
                 ) : vault.dexImage === "/icons/dex/beets.fi.svg" ? (
                   <div className="absolute flex items-center left-[0] h-[calc(100%-32px)]">
-                    <Image src={vault.dexImage} alt={""} height={28} width={28} />
+                    <Image
+                      src={vault.dexImage}
+                      alt={""}
+                      height={28}
+                      width={28}
+                    />
                   </div>
                 ) : (
                   <div className="absolute flex items-center left-[0] h-[calc(100%-32px)]">
-                    <Image src={vault.dexImage} alt={""} height={28} width={28} />
+                    <Image
+                      src={vault.dexImage}
+                      alt={""}
+                      height={28}
+                      width={28}
+                    />
                   </div>
                 )}
 
@@ -314,47 +344,112 @@ export const VaultTable = () => {
               {/* Eligible For */}
               <TableCellWP>
                 <div className="flex flex-col border">
-                  <div className="flex justify-between items-center gap-1 px-[6px] font-semibold border-b text-xs">Gems <div className="relative w-3 h-3"><Image src={'/icons/incentives/gems-05.png'} alt={""} fill /></div></div>
-                  <div className="flex justify-between items-center gap-1 px-[6px] font-semibold border-b text-xs">Points <div className="relative w-3 h-3"><Image src={'/icons/incentives/Sonic_Black.svg'} alt={""} fill /></div></div>
-                  <div className="flex justify-between items-center gap-1 px-[6px] font-semibold text-xs">Airdrop <div className="relative w-3 h-3"><Image src={'/icons/incentives/Parachuting-08.png'} alt={""} fill /></div></div>
+                  <div className="flex justify-between items-center gap-1 px-[6px] font-semibold border-b text-xs">
+                    Gems{" "}
+                    <div className="relative w-3 h-3">
+                      <Image
+                        src={"/icons/incentives/gems-05.png"}
+                        alt={""}
+                        fill
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center gap-1 px-[6px] font-semibold border-b text-xs">
+                    Points{" "}
+                    <div className="relative w-3 h-3">
+                      <Image
+                        src={"/icons/incentives/Sonic_Black.svg"}
+                        alt={""}
+                        fill
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center gap-1 px-[6px] font-semibold text-xs">
+                    Airdrop{" "}
+                    <div className="relative w-3 h-3">
+                      <Image
+                        src={"/icons/incentives/Parachuting-08.png"}
+                        alt={""}
+                        fill
+                      />
+                    </div>
+                  </div>
                 </div>
               </TableCellWP>
 
               <TableCell>
                 <div className="flex flex-col">
-                  <span className="font-light text-sm">{vault?.wallet ?? "0"}</span>
-                  <span className="font-light text-sm">${vault?.walletUSD ?? "0"}</span>
+                  <span className="font-light text-sm">
+                    {vault?.wallet ?? "0"}
+                  </span>
+                  <span className="font-light text-sm">
+                    ${vault?.walletUSD ?? "0"}
+                  </span>
                 </div>
               </TableCell>
 
-              {vault.kind === "clm" ?
+              {vault.kind === "clm" ? (
                 <TableCell>
-                  {vault?.name.split("-")[0]} {vault?.deposited?.token0 ?? "0"} <br /> {vault?.name.split("-")[1]} {vault?.deposited?.token1 ?? "0"}
-                </TableCell> : <TableCell>
+                  {vault?.name.split("-")[0]} {vault?.deposited?.token0 ?? "0"}{" "}
+                  <br /> {vault?.name.split("-")[1]}{" "}
+                  {vault?.deposited?.token1 ?? "0"}
+                </TableCell>
+              ) : (
+                <TableCell>
                   <div className="flex flex-col">
-                    <span className="font-light text-sm">{vault?.deposited?.token0 ?? "0"}</span>
-                    <span className="font-light text-sm">${vault?.depositedUSD?.token0 ?? "0"}</span>
+                    <span className="font-light text-sm">
+                      {vault?.deposited?.token0 ?? "0"}
+                    </span>
+                    <span className="font-light text-sm">
+                      ${vault?.depositedUSD?.token0 ?? "0"}
+                    </span>
                   </div>
                 </TableCell>
-              }
+              )}
 
               {/* Apy */}
-              <TableCell className="text-green-500">{typeof vault?.breakdown?.totalApy === "number"
-                ? (vault.breakdown.totalApy * 100).toFixed(3)
-                : 0}%</TableCell>
+              <TableCell className="text-green-500">
+                {typeof vault?.breakdown?.totalApy === "number"
+                  ? (vault.breakdown.totalApy * 100).toFixed(3)
+                  : 0}
+                %
+              </TableCell>
 
               {/* Daily */}
-              <TableCell>{vault?.breakdown?.tradingApr ? (vault?.breakdown?.tradingApr * 100 / 365).toFixed(4) ?? 0 : vault?.breakdown?.vaultApr !== undefined
-                ? (vault.breakdown.vaultApr * 100 / 365).toFixed(4) : 0}%</TableCell>
+              <TableCell>
+                {vault?.breakdown?.tradingApr
+                  ? ((vault?.breakdown?.tradingApr * 100) / 365).toFixed(4) ?? 0
+                  : vault?.breakdown?.vaultApr !== undefined
+                  ? ((vault.breakdown.vaultApr * 100) / 365).toFixed(4)
+                  : 0}
+                %
+              </TableCell>
 
-              {vault.kind === "clm" ? <TableCell className="flex gap-10 justify-center items-center">
-                <DepositVaultModalCLM vault={vault} onApprove={() => setRefreshKey((prevKey) => prevKey + 1)} />
-                <WithdrawVaultModalCLM vault={vault} onApprove={() => setRefreshKey((prevKey) => prevKey + 1)} />
-              </TableCell> : <TableCell className="flex gap-10 justify-center items-center">
-                <DepositVaultModalV7 vault={vault} lps={lps?.[vault.id]} onApprove={() => setRefreshKey((prevKey) => prevKey + 1)} />
-                <WithdrawVaultModalV7 vault={vault} lps={lps?.[vault.id]} onApprove={() => setRefreshKey((prevKey) => prevKey + 1)} />
-              </TableCell>}
-
+              {vault.kind === "clm" ? (
+                <TableCell className="flex gap-10 justify-center items-center">
+                  <DepositVaultModalCLM
+                    vault={vault}
+                    onApprove={() => setRefreshKey((prevKey) => prevKey + 1)}
+                  />
+                  <WithdrawVaultModalCLM
+                    vault={vault}
+                    onApprove={() => setRefreshKey((prevKey) => prevKey + 1)}
+                  />
+                </TableCell>
+              ) : (
+                <TableCell className="flex gap-10 justify-center items-center">
+                  <DepositVaultModalV7
+                    vault={vault}
+                    lps={lps?.[vault.id]}
+                    onApprove={() => setRefreshKey((prevKey) => prevKey + 1)}
+                  />
+                  <WithdrawVaultModalV7
+                    vault={vault}
+                    lps={lps?.[vault.id]}
+                    onApprove={() => setRefreshKey((prevKey) => prevKey + 1)}
+                  />
+                </TableCell>
+              )}
             </TableRow>
           ))}
         </TableBody>

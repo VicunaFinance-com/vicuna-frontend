@@ -18,7 +18,12 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@/queries": ["./queries"],
+      "@/constants": ["./constants"],
+      "@/helpers": ["./helpers"],
+      "@/hooks": ["./hooks"],
+      "@/components": ["./components/new"]
     }
   },
   "include": [
