@@ -22,7 +22,7 @@
         "imageSrc0": "/icons/coins/ws_token.png",
         "imageSrc1": "/icons/coins/goglz.png",
         "dexImage": "/icons/dex/SwapX_Black.svg",
-        "vaultReward": "/icons/rewards/all-options.svg",
+        "vaultReward": "/icons/rewards/Meme Mania 2.png",
         "kind": "v7",
         "chainId": 146,
         "lpUrl": "https://swapx.fi/earn?search=ws%2Fgoglz&orderBy=totalValueLockedUSD&orderDirection=desc&orderByCore=totalValueLockedUSD&orderDirectionCore=desc&ownerType=pools&filter=classic-volatile"
@@ -64,7 +64,7 @@
         "imageSrc0": "/icons/coins/ws_token.png",
         "imageSrc1": "/icons/coins/eco.png",
         "dexImage": "/icons/dex/SwapX_Black.svg",
-        "vaultReward": "/icons/rewards/all-options.svg",
+        "vaultReward": "/icons/rewards/Meme Mania 3.png",
         "kind": "v7",
         "chainId": 146,
         "lpUrl": "https://swapx.fi/earn?search=ws%2Feco&orderBy=totalValueLockedUSD&orderDirection=desc&orderByCore=totalValueLockedUSD&orderDirectionCore=desc&ownerType=pools&filter=classic-volatile"
